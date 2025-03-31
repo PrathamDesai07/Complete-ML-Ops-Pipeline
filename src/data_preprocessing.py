@@ -12,7 +12,7 @@ nltk.download('punkt_tab')
 log_dir = 'logs'
 os.makedirs(log_dir, exist_ok=True)
 
-logger = logging.getLogger('data_proProcessing')
+logger = logging.getLogger('data_preProcessing')
 logger.setLevel('DEBUG')
 
 console_handler = logging.StreamHandler()

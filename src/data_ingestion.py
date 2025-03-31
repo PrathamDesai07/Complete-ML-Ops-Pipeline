@@ -64,7 +64,7 @@ def preProcess_data(df: pd.DataFrame) -> pd.DataFrame:
 
 def main():
     try:
-        test_size = 0.2
+        test_size = 0.15
         data_path = '/teamspace/studios/this_studio/Complete-ML-Ops-Pipeline/Experiments/spam.csv'
         df = load_data(data_path)
         final_df = preProcess_data(df)
