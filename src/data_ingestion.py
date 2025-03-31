@@ -2,7 +2,7 @@ import pandas as pd
 import os
 from sklearn.model_selection import train_test_split
 import logging
-
+import yaml
 
 #Ensure if 'logs' directory is existing
 log_dir = 'logs'
@@ -25,6 +25,19 @@ file_handler.setFormatter(formatter)
 
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
+
+def load_yaml(file_path: str) -> dict:
+    try:
+        with open(file_path, 'r') as f:
+            params = yaml.safe_load(f)
+        logger.debug(f'Safely readed the data from yaml file at location: {file_path}')
+        return params
+    except FileNotFoundError as e:
+        logger.error(f'File not found at path: {e}')
+        raise
+    except Exception as e:
+        logger.error(f'Unwanted Exception raised as: {e}')
+        raise
 
 def load_data(data_url: str) -> pd.DataFrame:
     try:
@@ -64,8 +77,13 @@ def preProcess_data(df: pd.DataFrame) -> pd.DataFrame:
 
 def main():
     try:
-        test_size = 0.15
+        yaml_file_path = "/teamspace/studios/this_studio/Complete-ML-Ops-Pipeline/params.yaml"
         data_path = '/teamspace/studios/this_studio/Complete-ML-Ops-Pipeline/Experiments/spam.csv'
+
+        params = load_yaml(file_path= yaml_file_path)
+        test_size = params['data_ingestion']['test_size']
+        # test_size = 0.15
+
         df = load_data(data_path)
         final_df = preProcess_data(df)
         train_data, test_data = train_test_split(final_df, test_size=test_size, random_state = 2)

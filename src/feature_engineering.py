@@ -1,7 +1,9 @@
+from fileinput import fileno
 import os
 import logging
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
+import yaml
 
 log_dir = 'logs'
 os.makedirs(log_dir, exist_ok=True)
@@ -22,6 +24,19 @@ file_handler.setFormatter(formatter)
 
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
+
+def load_yaml(file_path: str) -> dict:
+    try:
+        with open(file_path, 'r') as f:
+            params = yaml.safe_load(f)
+        logger.debug(f'Safely readed the data from yaml file at location: {file_path}')
+        return params
+    except FileNotFoundError as e:
+        logger.error(f'File not found at location: {file_path}')
+        raise
+    except Exception as e:
+        logger.error(f'Unwanted Error Raised while reading the yaml as: {e}')
+        raise
 
 def load_data(file_path: str) -> pd.DataFrame:
     '''
@@ -76,11 +91,14 @@ def save_data(df: pd.DataFrame, file_path: str) -> None:
 
 def main():
     try:
-        max_features = 50
-
+        yaml_file_path = '/teamspace/studios/this_studio/Complete-ML-Ops-Pipeline/params.yaml'
         train_data = load_data('/teamspace/studios/this_studio/Complete-ML-Ops-Pipeline/data/interim/train_preprocessed.csv')
         test_data = load_data('/teamspace/studios/this_studio/Complete-ML-Ops-Pipeline/data/interim/test_preprocessed.csv')
-
+        
+        params = load_yaml(file_path=yaml_file_path)
+        max_features = params['feature_engineering']['max_features']
+        # max_features = 50
+        
         train_df, test_df = apply_tfidf(train_data=train_data, test_data=test_data, max_features=max_features)
 
         save_data(train_df, os.path.join('./data', 'processed', 'train_tfidf.csv'))

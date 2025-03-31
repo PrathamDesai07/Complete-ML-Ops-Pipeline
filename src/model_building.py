@@ -4,6 +4,7 @@ import pandas as pd
 import  pickle
 import logging
 from sklearn.ensemble import RandomForestClassifier
+import yaml
 
 log_dir = 'logs'
 os.makedirs(log_dir, exist_ok=True)
@@ -24,6 +25,19 @@ file_handler.setFormatter(formatter)
 
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
+
+def load_yaml(file_path: str) -> dict:
+    try:
+        with open(file_path, 'r') as f:
+            params = yaml.safe_load(f)
+        logger.debug(f'Safely readed the data from yaml file at location: {file_path}')
+        return params
+    except FileNotFoundError as e:
+        logger.error(f'File not found at location: {file_path}')
+        raise
+    except Exception as e:
+        logger.error(f'Unwanted Error Raised while reading the yaml as: {e}')
+        raise
 
 def load_data(file_path: str) -> pd.DataFrame:
     '''
@@ -76,7 +90,12 @@ def save_model(model, file_path: str) -> None:
 
 def main():
     try: 
-        params = {'n_estimators': 30, 'random_state':2}
+        yaml_file_path = '/teamspace/studios/this_studio/Complete-ML-Ops-Pipeline/params.yaml'
+        params = load_yaml(file_path=yaml_file_path)
+        n_estimators = params['model_building']['n_estimators']
+        random_state = params['model_building']['random_state']
+        params = {'n_estimators': n_estimators, 'random_state': random_state}
+        # params = {'n_estimators': 30, 'random_state':2}
         train_data = load_data('/teamspace/studios/this_studio/Complete-ML-Ops-Pipeline/data/processed/train_tfidf.csv')
         x_train = train_data.iloc[:, :-1].values
         y_train = train_data.iloc[:, -1].values
