@@ -5,8 +5,8 @@ import  pickle
 import logging
 from sklearn.metrics import accuracy_score, precision_score, recall_score, roc_auc_score
 import json
-
-from sklearn.model_selection import RandomizedSearchCV
+import yaml
+from dvclive import Live
 
 log_dir = 'logs'
 os.makedirs(log_dir, exist_ok=True)
@@ -27,6 +27,19 @@ file_handler.setFormatter(formatter)
 
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
+
+def load_yaml(file_path: str) -> dict:
+    try:
+        with open(file_path, 'r') as f:
+            params = yaml.safe_load(f)
+        logger.debug(f'Safely readed the data from yaml file at location: {file_path}')
+        return params
+    except FileNotFoundError as e:
+        logger.error(f'File not found at path: {e}')
+        raise
+    except Exception as e:
+        logger.error(f'Unwanted Exception raised as: {e}')
+        raise
 
 def load_model(file_path: str):
     try: 
@@ -71,7 +84,7 @@ def evaluate_model(clf, x_test: np.ndarray, y_test: np.ndarray) -> dict:
         }
 
         logger.debug('Model Evaluation metrics caluclated')
-        return metrics_dict
+        return metrics_dict, y_pred
 
     except Exception as e:
         logger.error(f'Error during model Evaluation as: {e}')
@@ -89,17 +102,26 @@ def save_metrics(metrics: dict, file_path: str) -> None:
 
 def main():
     try:
+        yaml_file_path = "/teamspace/studios/this_studio/Complete-ML-Ops-Pipeline/params.yaml"
         model_path = "/teamspace/studios/this_studio/Complete-ML-Ops-Pipeline/models/model.pkl"
         test_data_path = "/teamspace/studios/this_studio/Complete-ML-Ops-Pipeline/data/processed/test_tfidf.csv"
         metrics_path = "./reports/metrics.json"
 
+        params = load_yaml(file_path= yaml_file_path)
         clf = load_model(model_path)
         test_data = load_data(test_data_path)
 
         x_test = test_data.iloc[:, :-1].values
         y_test = test_data.iloc[:, -1].values
 
-        metrics = evaluate_model(clf, x_test, y_test)
+        metrics, y_pred = evaluate_model(clf, x_test, y_test)
+
+        with Live(save_dvc_exp=True) as live:
+            live.log_metric('accuracy', accuracy_score(y_true=y_test, y_pred=y_pred))
+            live.log_metric('precision', precision_score(y_true=y_test, y_pred=y_pred))
+            live.log_metric('recall', recall_score(y_true=y_test, y_pred=y_pred))
+            
+            live.log_params(params)
         save_metrics(metrics, metrics_path)
     except Exception as e:
         logger.error(f'Unwanted error raise as {e}')

@@ -15,7 +15,17 @@ Setting up the DVC pipeline(with Params)
 10. Do "dvc repro" to test the pipeline again
 11. now git add, commit, push
 
+Experiments with DVC:
+12. pip install dvclive
+13. add the dvclive code block mentioned below
+14. do 'dvc exp run', it'll create a new dvc.yaml file(if not created) and a dvclive dir(each run will be considered as an Experiments)
+15. do 'dvc exp show', it'll show the Experiments in terminal or download the vs code extension
+16. do 'dvc exp remove {exp-name}' to remove a experiment, 'dvc exp apply {exp-name}' to apply a specific exp
+17. change params and re-run
+18. do git add, commit, push
 
+
+YAML-setup
 import yaml
 def load_yaml(file_path: str) -> dict:
     try:
@@ -27,3 +37,10 @@ def load_yaml(file_path: str) -> dict:
         logger.error(f'File not found at path: {e}')
     except Exception as e:
         logger.error(f'Unwanted Exception raised as: {e}')
+
+*************************************************************************************************************
+dvc-live setup
+1. import the dvclive and yaml
+from dvclive import Live
+import yaml
+paste load_yaml and initiate the params var in main
