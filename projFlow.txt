@@ -1,0 +1,5 @@
+Builing Pipeline:
+1. Create a GitHub repo and clone it in local
+2. Add src folder along with its all components(run them individually).
+3. Add data, models, reports to .gitIgnore file
+4. now git add-commit-push.
