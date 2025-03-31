@@ -23,8 +23,6 @@ file_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 logger.addHandler(file_handler)
 
-
-
 def load_data(file_path: str) -> pd.DataFrame:
     '''
     Loads the data from a specific url/path
@@ -61,10 +59,10 @@ def apply_tfidf(train_data: pd.DataFrame, test_data: pd.DataFrame, max_features:
         test_df = pd.DataFrame(x_test_bow.toarray())
         test_df['label'] = y_test
 
-        logger.debug('Bag of words applied and dataTransformed')
+        logger.debug('TFIDF applied and dataTransformed')
         return train_df, test_df
     except Exception as e:
-        logger.error(f'Unwanted Error occured while transforming the bag of words: {e}')
+        logger.error(f'Unwanted Error occured while performing TFIDF: {e}')
         raise
 
 def save_data(df: pd.DataFrame, file_path: str) -> None:
